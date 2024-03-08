@@ -1,4 +1,6 @@
 <?php
+
+require_once('classes/user.php');
 // Is de register button aangeklikt?
 if (isset($_POST['register-btn'])) {
     require_once('classes/user.php');
@@ -10,8 +12,17 @@ if (isset($_POST['register-btn'])) {
 
     $user->ShowUser();
 
-    // Validatie gegevens
-    // Hoe???
+// Create an instance of the User class
+$user = new User();
+
+// Set properties and perform registration
+$user->username = $_POST['username'];
+$user->SetPassword($_POST['password']);
+
+// Validate and register the user
+$errors = $user->RegisterUser();
+
+// Rest of your code...
 
     if (count($errors) == 0) {
         // Register user

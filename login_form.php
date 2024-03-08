@@ -1,41 +1,38 @@
 <?php
-// Is de login button aangeklikt?
+require_once('classes/user.php');
+
+// Create an instance of the User class
+$user = new User();
+
+// Check if the user is already logged in
+if ($user->IsLoggedin()) {
+    // User is logged in, redirect to the desired page
+    header("location: index.php");
+    exit();
+}
+
+// Initialize errors array
+$errors = [];
+
+// Check if the login button is clicked
 if (isset($_POST['login-btn'])) {
-
-    require_once('classes/user.php');
-    $user = new User();
-
     $user->username = $_POST['username'];
     $user->SetPassword($_POST['password']);
 
-    $user->ShowUser();
-
-    // Validatie gegevens
+    // Validate user inputs
     $errors = $user->ValidateUser();
 
-    // Indien geen fouten dan inloggen
-    if (count($errors) == 0) {
-        //Inloggen
+    // If no validation errors, attempt login
+    if (empty($errors)) {
+        // Attempt login
         if ($user->LoginUser()) {
-            echo "Login ok";
-            // Ga naar pagina??
+            // Login successful, redirect
             header("location: index.php");
+            exit();
         } else {
-            array_push($errors, "Login mislukt");
-            echo "Login NOT ok";
+            // Login failed
+            array_push($errors, "Login failed");
         }
-    }
-
-    if (count($errors) > 0) {
-        $message = "";
-        foreach ($errors as $error) {
-            $message .= $error . "\\n";
-        }
-
-        echo "
-        <script>alert('" . $message . "')</script>
-        <script>window.location = 'login_form.php'</script>";
-
     }
 }
 
@@ -63,6 +60,17 @@ if (isset($_POST['login-btn'])) {
         <button type="submit" name="login-btn">Login</button>
         <br>
         <a href="register_form.php">Registration</a>
+
+        <?php
+        // Display errors, if any
+        if (!empty($errors)) {
+            echo "<div style='color: red;'>";
+            foreach ($errors as $error) {
+                echo $error . "<br>";
+            }
+            echo "</div>";
+        }
+        ?>
     </form>
         
 </body>

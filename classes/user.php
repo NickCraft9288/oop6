@@ -24,6 +24,10 @@ class User{
         echo "<br>Password: $this->password<br>";
 
     }
+    public function __construct() {
+        $this->db = new PDO("mysql:host=localhost;dbname=user", "root", "");
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
     public function RegisterUser()
     {
         $status = false;
@@ -93,13 +97,31 @@ class User{
         return $errors;
     }
 
-    public function LoginUser(){
-        // Connect database
-        // Hier moet je de logica toevoegen om de gebruiker te zoeken in de database.
-        echo "Username:" . $this->username;
+    public function LoginUser() {
+        try {
+            // Prepare the SQL query
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
+            $stmt->bindParam(':username', $this->username);
+            // Execute the query
+            $stmt->execute();
+    
+            // Fetch the user
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Indien gevonden dan sessie vullen
-        return true;
+            // Check if user exists and password is correct
+            if ($user && password_verify($this->GetPassword(), $user['password'])) {
+                // Set session variables
+                $_SESSION['username'] = $user['username'];
+
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            // Handle errors if necessary
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
     }
 
     // Check if the user is already logged in
